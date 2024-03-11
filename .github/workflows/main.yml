@@ -1,0 +1,47 @@
+name: Rust
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  rust:
+    name: Build, lint, test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - features: default
+          - os: ubuntu-latest
+            features: integration-tests
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Install nextest
+        uses: taiki-e/install-action@nextest
+
+      - name: Run fmt
+        run: cargo fmt --all -- --check
+
+      - name: Build documentation
+        run: cargo doc --no-deps --workspace
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: Run clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run tests
+        run: cargo nextest run --no-fail-fast --all-targets --features ${{ matrix.features }}
