@@ -9,7 +9,7 @@ edition = "2021"
 authors = ["Triton Software AG"]
 license = "Apache-2.0"
 homepage = "https://triton-vm.org/"
-repository = "https://github.com/TritonVM/triton-vm"
+repository = "https://github.com/TritonVM/triton-tui"
 documentation = "https://docs.rs/triton-tui/"
 
 [dependencies]
