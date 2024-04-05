@@ -83,7 +83,7 @@ impl Home {
             secret_input_height,
             message_box_height,
         ];
-        let [state_area, public_input_area, secret_input_area, message_box_area] =
+        let [state_area, public_input, secret_input, message_box] =
             Layout::vertical(constraints).areas(area);
 
         let op_stack_widget_width = Constraint::Length(30);
@@ -92,30 +92,29 @@ impl Home {
             true => Constraint::Length(32),
             false => Constraint::Length(1),
         };
-        let [op_stack_area, remaining_area, sponge_state_area] =
+        let [op_stack, remaining_area, sponge] =
             Layout::horizontal([op_stack_widget_width, remaining_width, sponge_state_width])
                 .areas(state_area);
 
         let show = Constraint::Fill(1);
         let hide = Constraint::Length(0);
-        let hints_program_calls_constraints = match (self.type_hints, self.call_stack) {
-            (true, true) => [show, show, show],
-            (true, false) => [show, show, hide],
-            (false, true) => [hide, show, show],
-            (false, false) => [hide, show, hide],
-        };
-        let [type_hint_area, program_area, call_stack_area] =
-            Layout::horizontal(hints_program_calls_constraints).areas(remaining_area);
+        let maybe_show = |is_visible| if is_visible { show } else { hide };
+        let [type_hint, program, call_stack] = Layout::horizontal([
+            maybe_show(self.type_hints),
+            show,
+            maybe_show(self.call_stack),
+        ])
+        .areas(remaining_area);
 
         WidgetAreas {
-            op_stack: op_stack_area,
-            type_hint: type_hint_area,
-            program: program_area,
-            call_stack: call_stack_area,
-            sponge: sponge_state_area,
-            public_input: public_input_area,
-            secret_input: secret_input_area,
-            message_box: message_box_area,
+            op_stack,
+            type_hint,
+            program,
+            call_stack,
+            sponge,
+            public_input,
+            secret_input,
+            message_box,
         }
     }
 
