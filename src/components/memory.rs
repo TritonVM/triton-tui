@@ -405,7 +405,7 @@ mod tests {
             undo_stack: arb_memory.undo_stack,
         };
 
-        vm_state.program = program.instructions.clone();
+        vm_state.program.clone_from(&program.instructions);
         let mut complete_state = TritonVMState::new(&TuiArgs::default()).unwrap();
         complete_state.vm_state = vm_state;
         complete_state.program = program;

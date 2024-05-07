@@ -114,7 +114,7 @@ impl TritonVMState {
         Ok(PublicInput::new(elements))
     }
 
-    fn non_determinism_from_args(args: &TuiArgs) -> Result<NonDeterminism<BFieldElement>> {
+    fn non_determinism_from_args(args: &TuiArgs) -> Result<NonDeterminism> {
         let Some(ref input_args) = args.input_args else {
             return Ok(NonDeterminism::default());
         };
@@ -122,8 +122,8 @@ impl TritonVMState {
             return Ok(NonDeterminism::default());
         };
         let file = fs::File::open(non_determinism_path)?;
-        let non_determinism: NonDeterminism<u64> = serde_json::from_reader(file)?;
-        Ok(NonDeterminism::from(&non_determinism))
+        let non_determinism = serde_json::from_reader(file)?;
+        Ok(non_determinism)
     }
 
     fn top_of_stack(&self) -> TopOfStack {
@@ -306,7 +306,7 @@ mod tests {
         #[strategy(vec(arb(), NUM_OP_STACK_REGISTERS..100))] stack: Vec<BFieldElement>,
     ) {
         let mut triton_vm_state = TritonVMState::new(&TuiArgs::default()).unwrap();
-        triton_vm_state.vm_state.op_stack.stack = stack.clone();
+        triton_vm_state.vm_state.op_stack.stack.clone_from(&stack);
         let top_of_stack = triton_vm_state.top_of_stack();
         prop_assert_eq!(top_of_stack[0], stack[stack.len() - 1]);
         prop_assert_eq!(top_of_stack[1], stack[stack.len() - 2]);
@@ -315,13 +315,14 @@ mod tests {
 
     #[proptest]
     fn serialize_and_deserialize_non_determinism_to_and_from_json(
-        #[strategy(arb())] non_determinism: NonDeterminism<u64>,
+        #[strategy(arb())] non_determinism: NonDeterminism,
     ) {
         let serialized = serde_json::to_string(&non_determinism).unwrap();
-        let deserialized: NonDeterminism<u64> = serde_json::from_str(&serialized).unwrap();
+        let deserialized: NonDeterminism = serde_json::from_str(&serialized).unwrap();
         prop_assert_eq!(non_determinism, deserialized);
     }
 
+    /// In case the serialization of the initial state changes, use this to re-generate it.
     #[test]
     fn serialize_example_program_and_input_to_json() {
         let args = args_for_test_program_with_test_input();

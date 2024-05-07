@@ -98,7 +98,6 @@ impl ShadowMemory {
             Instruction::ReadMem(n) => self.read_mem(n, old_top_of_stack),
             Instruction::WriteMem(n) => self.write_mem(n, old_top_of_stack),
             Instruction::Hash => self.hash(),
-            Instruction::DivineSibling => self.divine_sibling(),
             Instruction::AssertVector => _ = self.pop_n(N5),
             Instruction::SpongeInit => (),
             Instruction::SpongeAbsorb => self.sponge_absorb(),
@@ -121,6 +120,9 @@ impl ShadowMemory {
             Instruction::XbMul => self.xb_mul(),
             Instruction::ReadIo(n) => self.extend_by(n),
             Instruction::WriteIo(n) => _ = self.pop_n(n),
+            Instruction::MerkleStep => (),
+            Instruction::XxDotStep => (),
+            Instruction::XbDotStep => (),
         }
     }
 
@@ -205,12 +207,6 @@ impl ShadowMemory {
             };
             self.apply_type_hint(type_hint).unwrap();
         }
-    }
-
-    fn divine_sibling(&mut self) {
-        self.pop_n(N5);
-        self.extend_by(N5);
-        self.extend_by(N5);
     }
 
     fn sponge_absorb(&mut self) {

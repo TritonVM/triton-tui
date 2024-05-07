@@ -42,8 +42,8 @@ read_from_secret_input:
     divine 3                        // flag `--non-determinism ./non_determinism.json`
     mul mul
     swap 5
-    divine_sibling pop 5
-    divine_sibling hash
+    merkle_step
+    merkle_step
     return
 
 sponge_instructions:
