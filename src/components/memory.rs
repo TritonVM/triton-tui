@@ -93,9 +93,11 @@ impl<'a> Memory<'a> {
     pub fn handle_instruction(&mut self, executed_instruction: ExecutedInstruction) {
         let overshoot_adjustment = match executed_instruction.instruction {
             Instruction::ReadMem(_) => bfe!(1),
-            Instruction::WriteMem(_) => bfe!(-1),
-            Instruction::SpongeAbsorbMem => bfe!(-1),
-            _ => return, // instruction does not affect memory
+            Instruction::WriteMem(_)
+            | Instruction::SpongeAbsorbMem
+            | Instruction::XbDotStep
+            | Instruction::XxDotStep => bfe!(-1),
+            _ => return, // instruction does not access memory
         };
         self.most_recent_address = executed_instruction.new_top_of_stack[0] + overshoot_adjustment;
     }
