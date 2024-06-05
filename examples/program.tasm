@@ -16,6 +16,7 @@ hint numbers: array = stack[1..4]   // Annotations also work with ranges.
 call check_result
 call write_to_memory
 call read_from_secret_input
+call recursive_function
 call sponge_instructions
 halt
 
@@ -48,5 +49,23 @@ read_from_secret_input:
 
 sponge_instructions:
     sponge_init                     // Show the Sponge state with `t,s`.
+    push 42
+    sponge_absorb_mem               // to absorb stack elements, use `sponge_absorb`
+    pop 1
     sponge_squeeze
     return
+
+recursive_function:
+    // set up for recursion
+    push 0 swap 5
+    hint loop_counter = stack[5]
+    push 3 swap 5
+    hint termination_condition = stack[5]
+    call actual_recursion_loop
+    return
+
+actual_recursion_loop:
+    // change loop counter to eventually reach termination condition
+    swap 6 push 1 add swap 6
+    // do some meaningful work here
+    recurse_or_return

@@ -91,14 +91,13 @@ impl<'a> Memory<'a> {
     }
 
     pub fn handle_instruction(&mut self, executed_instruction: ExecutedInstruction) {
-        let presumed_ram_pointer = executed_instruction.new_top_of_stack[0];
         let overshoot_adjustment = match executed_instruction.instruction {
             Instruction::ReadMem(_) => bfe!(1),
             Instruction::WriteMem(_) => bfe!(-1),
-            _ => return,
+            Instruction::SpongeAbsorbMem => bfe!(-1),
+            _ => return, // instruction does not affect memory
         };
-        let last_ram_pointer = presumed_ram_pointer + overshoot_adjustment;
-        self.most_recent_address = last_ram_pointer;
+        self.most_recent_address = executed_instruction.new_top_of_stack[0] + overshoot_adjustment;
     }
 
     pub fn toggle_address_display(&mut self) {

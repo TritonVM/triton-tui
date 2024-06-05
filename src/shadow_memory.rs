@@ -94,6 +94,7 @@ impl ShadowMemory {
             Instruction::Call(_) => (),
             Instruction::Return => (),
             Instruction::Recurse => (),
+            Instruction::RecurseOrReturn => (),
             Instruction::Assert => _ = self.pop(),
             Instruction::ReadMem(n) => self.read_mem(n, old_top_of_stack),
             Instruction::WriteMem(n) => self.write_mem(n, old_top_of_stack),
@@ -101,6 +102,7 @@ impl ShadowMemory {
             Instruction::AssertVector => _ = self.pop_n(N5),
             Instruction::SpongeInit => (),
             Instruction::SpongeAbsorb => self.sponge_absorb(),
+            Instruction::SpongeAbsorbMem => self.sponge_absorb_mem(old_top_of_stack),
             Instruction::SpongeSqueeze => self.sponge_squeeze(),
             Instruction::Add => self.binop_maybe_keep_hint(),
             Instruction::Mul => self.binop_maybe_keep_hint(),
@@ -212,6 +214,19 @@ impl ShadowMemory {
     fn sponge_absorb(&mut self) {
         self.pop_n(N5);
         self.pop_n(N5);
+    }
+
+    fn sponge_absorb_mem(&mut self, old_top_of_stack: TopOfStack) {
+        const NUM_OVERWRITTEN_ELEMENTS: usize = 4;
+
+        let ram_pointer_hint = self.pop();
+        let mut ram_pointer = old_top_of_stack[0];
+        let stack_size = self.stack.len();
+        for i in 1..=NUM_OVERWRITTEN_ELEMENTS {
+            self.stack[stack_size - i] = self.ram.get(&ram_pointer).cloned().flatten();
+            ram_pointer.increment();
+        }
+        self.push(ram_pointer_hint);
     }
 
     fn sponge_squeeze(&mut self) {
