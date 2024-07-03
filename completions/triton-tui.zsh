@@ -14,7 +14,7 @@ _triton-tui() {
     fi
 
     local context curcontext="$curcontext" state line
-    _arguments "${_arguments_options[@]}" \
+    _arguments "${_arguments_options[@]}" : \
 '-i+[File containing public input]:PATH: ' \
 '--input=[File containing public input]:PATH: ' \
 '-n+[JSON file containing all non-determinism]:PATH: ' \
