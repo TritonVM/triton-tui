@@ -43,12 +43,11 @@ impl ShadowMemory {
     }
 
     fn initial_program_digest_type_hint() -> TypeHint {
-        let digest_length = tip5::DIGEST_LENGTH;
         TypeHint {
             type_name: Some("Digest".to_string()),
             variable_name: "program_digest".to_string(),
-            starting_index: NUM_OP_STACK_REGISTERS - digest_length,
-            length: digest_length,
+            starting_index: NUM_OP_STACK_REGISTERS - Digest::LEN,
+            length: Digest::LEN,
         }
     }
 

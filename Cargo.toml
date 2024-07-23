@@ -25,7 +25,7 @@ fs-err = "2.11"
 futures = "0.3"
 human-panic = "2"
 itertools = "0.13"
-lazy_static = "1.4"
+lazy_static = "1.5"
 libc = "0.2"
 ratatui = { version = "0.27", features = ["serde", "macros"] }
 rexpect = { version = "0.5", optional = true }
@@ -39,13 +39,13 @@ tokio-util = "0.7"
 tracing = "0.1"
 tracing-error = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "serde"] }
-triton-vm = "0.42.0-alpha.5"
-tui-textarea = "0.4"
+triton-vm = "0.42.0-alpha.6"
+tui-textarea = "0.5"
 
 [dev-dependencies]
 assert2 = "0.3"
 pretty_assertions = "1.4"
-proptest = "1.4"
+proptest = "1.5"
 proptest-arbitrary-interop = "0.1"
 test-strategy = "0.4.0"
 
@@ -53,7 +53,7 @@ test-strategy = "0.4.0"
 clap = { version = "4", features = ["derive", "cargo", "wrap_help", "unicode", "string"] }
 clap_complete = "4.5"
 directories = "5"
-lazy_static = "1.4"
+lazy_static = "1.5"
 
 [features]
 default = []
