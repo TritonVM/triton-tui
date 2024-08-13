@@ -63,8 +63,9 @@ pub(crate) struct Tui {
 impl Tui {
     pub fn new() -> Result<Self> {
         if !io().is_tty() {
-            error!("not a TTY");
-            bail!("not a TTY");
+            let error_desc = "not a TTY";
+            error!(error_desc);
+            bail!(error_desc);
         }
 
         let tick_rate = DEFAULT_TICK_RATE;

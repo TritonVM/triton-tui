@@ -80,14 +80,16 @@ impl TritonVMState {
 
     fn vm_state_from_initial_state(args: &TuiArgs, program: &Program) -> Result<VMState> {
         let Some(ref initial_state_path) = args.initial_state else {
-            error!("path to initial state must exist");
-            bail!("path to initial state must exist");
+            let error_desc = "path to initial state must exist";
+            error!(error_desc);
+            bail!(error_desc);
         };
         let file = fs::File::open(initial_state_path)?;
         let initial_state: VMState = serde_json::from_reader(file)?;
         if program.instructions != initial_state.program {
-            error!("given program must match program of given initial state");
-            bail!("given program must match program of given initial state");
+            let error_desc = "given program must match program of given initial state";
+            error!(error_desc);
+            bail!(error_desc);
         }
         Ok(initial_state)
     }
