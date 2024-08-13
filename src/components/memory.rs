@@ -208,9 +208,10 @@ impl<'a> Memory<'a> {
         render_info: RenderInfo,
         address: BFieldElement,
     ) -> Vec<Span> {
-        let address_style = match address == self.requested_address() {
-            true => Style::new().bold(),
-            false => Style::new().dim(),
+        let address_style = if address == self.requested_address() {
+            Style::new().bold()
+        } else {
+            Style::new().dim()
         };
 
         let maybe_value = render_info.state.vm_state.ram.get(&address);
@@ -225,9 +226,10 @@ impl<'a> Memory<'a> {
     }
 
     fn render_address(&self, address: BFieldElement) -> String {
-        match self.show_block_addresses {
-            true => Self::render_block_address(address),
-            false => address.to_string(),
+        if self.show_block_addresses {
+            Self::render_block_address(address)
+        } else {
+            address.to_string()
         }
     }
 
@@ -254,21 +256,24 @@ impl<'a> Memory<'a> {
     }
 
     fn render_text_input_widget(&mut self, frame: &mut Frame<'_>, render_info: RenderInfo) {
-        let placeholder_text = match self.text_area_in_focus {
-            true => "",
-            false => "Go to address. Empty for most recent read / write.",
+        let placeholder_text = if self.text_area_in_focus {
+            ""
+        } else {
+            "Go to address. Empty for most recent read / write."
         };
         self.text_area.set_placeholder_text(placeholder_text);
 
-        let cursor_style = match self.text_area_in_focus {
-            true => Style::default().add_modifier(Modifier::REVERSED),
-            false => Style::default(),
+        let cursor_style = if self.text_area_in_focus {
+            Style::default().add_modifier(Modifier::REVERSED)
+        } else {
+            Style::default()
         };
         self.text_area.set_cursor_style(cursor_style);
 
-        let text_style = match self.text_area_in_focus {
-            true => Style::default(),
-            false => Style::default().dim(),
+        let text_style = if self.text_area_in_focus {
+            Style::default()
+        } else {
+            Style::default().dim()
         };
         self.text_area.set_style(text_style);
 
@@ -334,9 +339,10 @@ impl<'a> Component for Memory<'a> {
             self.text_area_in_focus = !self.text_area_in_focus;
             return Ok(None);
         }
-        match self.text_area_in_focus {
-            true => _ = self.text_area.input(key_event),
-            false => self.scroll_content(key_event),
+        if self.text_area_in_focus {
+            self.text_area.input(key_event);
+        } else {
+            self.scroll_content(key_event);
         }
         Ok(None)
     }

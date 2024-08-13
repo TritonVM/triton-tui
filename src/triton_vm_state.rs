@@ -45,13 +45,15 @@ pub(crate) struct UndoInformation {
 impl TritonVMState {
     pub fn new(args: &TuiArgs) -> Result<Self> {
         let program = Self::program_from_args(args)?;
-        let vm_state = match args.initial_state.is_some() {
-            true => Self::vm_state_from_initial_state(args, &program)?,
-            false => Self::vm_state_with_specified_input(args, &program)?,
+        let vm_state = if args.initial_state.is_some() {
+            Self::vm_state_from_initial_state(args, &program)?
+        } else {
+            Self::vm_state_with_specified_input(args, &program)?
         };
-        let type_hints = match args.initial_state.is_some() {
-            true => ShadowMemory::new_for_initial_state(&vm_state),
-            false => ShadowMemory::new_for_default_initial_state(),
+        let type_hints = if args.initial_state.is_some() {
+            ShadowMemory::new_for_initial_state(&vm_state)
+        } else {
+            ShadowMemory::new_for_default_initial_state()
         };
 
         let mut state = Self {

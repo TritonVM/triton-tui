@@ -74,13 +74,15 @@ impl Home {
     }
 
     fn distribute_area_for_widgets(self, state: &TritonVMState, area: Rect) -> WidgetAreas {
-        let public_input_height = match self.maybe_render_public_input(state).is_some() {
-            true => Constraint::Length(2),
-            false => Constraint::Length(0),
+        let public_input_height = if self.maybe_render_public_input(state).is_some() {
+            Constraint::Length(2)
+        } else {
+            Constraint::Length(0)
         };
-        let secret_input_height = match self.maybe_render_secret_input(state).is_some() {
-            true => Constraint::Length(2),
-            false => Constraint::Length(0),
+        let secret_input_height = if self.maybe_render_secret_input(state).is_some() {
+            Constraint::Length(2)
+        } else {
+            Constraint::Length(0)
         };
         let message_box_height = Constraint::Length(2);
         let constraints = [
@@ -94,9 +96,10 @@ impl Home {
 
         let op_stack_widget_width = Constraint::Length(30);
         let remaining_width = Constraint::Fill(1);
-        let sponge_state_width = match self.sponge {
-            true => Constraint::Length(32),
-            false => Constraint::Length(1),
+        let sponge_state_width = if self.sponge {
+            Constraint::Length(32)
+        } else {
+            Constraint::Length(1)
         };
         let [op_stack, remaining_area, sponge] =
             Layout::horizontal([op_stack_widget_width, remaining_width, sponge_state_width])
@@ -218,13 +221,15 @@ impl Home {
             if ip_points_here {
                 line_number_of_ip = text.len();
             }
-            let ip = match ip_points_here {
-                true => Span::from("→").bold(),
-                false => Span::from(" "),
+            let ip = if ip_points_here {
+                Span::from("→").bold()
+            } else {
+                Span::from(" ")
             };
-            let mut gutter_item = match is_breakpoint {
-                true => format!("{:>address_width$}  ", "🔴").into(),
-                false => format!(" {address:>address_width$}  ").dim(),
+            let mut gutter_item = if is_breakpoint {
+                format!("{:>address_width$}  ", "🔴").into()
+            } else {
+                format!(" {address:>address_width$}  ").dim()
             };
             if let LabelledInstruction::Label(_) = labelled_instruction {
                 gutter_item = " ".into();
@@ -315,9 +320,10 @@ impl Home {
             bottom_right: symbols::line::ROUNDED.vertical_left,
             ..symbols::border::ROUNDED
         };
-        let borders = match self.sponge {
-            true => Borders::ALL,
-            false => Borders::TOP | Borders::RIGHT | Borders::BOTTOM,
+        let borders = if self.sponge {
+            Borders::ALL
+        } else {
+            Borders::TOP | Borders::RIGHT | Borders::BOTTOM
         };
         let block = Block::default()
             .borders(borders)
@@ -408,9 +414,10 @@ impl Home {
 
     fn render_message_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let message = self.message(render_info.state);
-        let status = match render_info.state.vm_state.halting {
-            true => Title::from(" HALT ".bold().green()),
-            false => Title::default(),
+        let status = if render_info.state.vm_state.halting {
+            Title::from(" HALT ".bold().green())
+        } else {
+            Title::default()
         };
 
         let block = Block::default()
