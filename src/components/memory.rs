@@ -279,7 +279,7 @@ impl<'a> Memory<'a> {
 
         let block = Self::text_input_block();
         self.text_area.set_block(block);
-        frame.render_widget(self.text_area.widget(), render_info.areas.text_input);
+        frame.render_widget(&self.text_area, render_info.areas.text_input);
     }
 
     fn memory_widget_block() -> Block<'a> {

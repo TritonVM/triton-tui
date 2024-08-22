@@ -104,6 +104,7 @@ impl ShadowMemory {
             Instruction::SpongeAbsorbMem => self.sponge_absorb_mem(old_top_of_stack),
             Instruction::SpongeSqueeze => self.sponge_squeeze(),
             Instruction::Add => self.binop_maybe_keep_hint(),
+            Instruction::AddI(_) => (),
             Instruction::Mul => self.binop_maybe_keep_hint(),
             Instruction::Invert => self.unop(),
             Instruction::Eq => self.eq(),
@@ -122,6 +123,7 @@ impl ShadowMemory {
             Instruction::ReadIo(n) => self.extend_by(n),
             Instruction::WriteIo(n) => _ = self.pop_n(n),
             Instruction::MerkleStep => (),
+            Instruction::MerkleStepMem => (),
             Instruction::XxDotStep => (),
             Instruction::XbDotStep => (),
         }

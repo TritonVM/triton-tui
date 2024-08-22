@@ -21,16 +21,16 @@ Register-ArgumentCompleter -Native -CommandName 'triton-tui' -ScriptBlock {
 
     $completions = @(switch ($command) {
         'triton-tui' {
-            [CompletionResult]::new('-i', 'i', [CompletionResultType]::ParameterName, 'File containing public input')
-            [CompletionResult]::new('--input', 'input', [CompletionResultType]::ParameterName, 'File containing public input')
-            [CompletionResult]::new('-n', 'n', [CompletionResultType]::ParameterName, 'JSON file containing all non-determinism')
-            [CompletionResult]::new('--non-determinism', 'non-determinism', [CompletionResultType]::ParameterName, 'JSON file containing all non-determinism')
-            [CompletionResult]::new('--initial-state', 'initial-state', [CompletionResultType]::ParameterName, 'JSON file containing entire initial state')
-            [CompletionResult]::new('--interrupt-cycle', 'interrupt-cycle', [CompletionResultType]::ParameterName, 'The maximum number of cycles to run after any interaction, preventing a frozen TUI in infinite loops')
-            [CompletionResult]::new('-h', 'h', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('--help', 'help', [CompletionResultType]::ParameterName, 'Print help')
-            [CompletionResult]::new('-V', 'V ', [CompletionResultType]::ParameterName, 'Print version')
-            [CompletionResult]::new('--version', 'version', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('-i', '-i', [CompletionResultType]::ParameterName, 'File containing public input')
+            [CompletionResult]::new('--input', '--input', [CompletionResultType]::ParameterName, 'File containing public input')
+            [CompletionResult]::new('-n', '-n', [CompletionResultType]::ParameterName, 'JSON file containing all non-determinism')
+            [CompletionResult]::new('--non-determinism', '--non-determinism', [CompletionResultType]::ParameterName, 'JSON file containing all non-determinism')
+            [CompletionResult]::new('--initial-state', '--initial-state', [CompletionResultType]::ParameterName, 'JSON file containing entire initial state')
+            [CompletionResult]::new('--interrupt-cycle', '--interrupt-cycle', [CompletionResultType]::ParameterName, 'The maximum number of cycles to run after any interaction, preventing a frozen TUI in infinite loops')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('-V', '-V ', [CompletionResultType]::ParameterName, 'Print version')
+            [CompletionResult]::new('--version', '--version', [CompletionResultType]::ParameterName, 'Print version')
             break
         }
     })
