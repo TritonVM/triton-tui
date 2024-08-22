@@ -60,7 +60,7 @@ impl Component for Help {
             Help::help_line("q", "quit"),
         ];
 
-        let centered_rect = Self::centered_rect(frame.size(), &text);
+        let centered_rect = Self::centered_rect(frame.area(), &text);
         let block = Block::default().title(title).padding(Padding::top(1));
         let paragraph = Paragraph::new(text.map(Line::from).to_vec()).block(block);
 

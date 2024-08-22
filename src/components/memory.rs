@@ -361,7 +361,7 @@ impl<'a> Component for Memory<'a> {
     }
 
     fn draw(&mut self, frame: &mut Frame<'_>, state: &TritonVMState) -> Result<()> {
-        let widget_areas = self.distribute_area_for_widgets(frame.size());
+        let widget_areas = self.distribute_area_for_widgets(frame.area());
         let render_info = RenderInfo {
             state,
             areas: widget_areas,
