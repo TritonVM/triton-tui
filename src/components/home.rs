@@ -156,8 +156,7 @@ impl Home {
             let stack_index = Span::from(format!("{i:>3}")).set_style(stack_index_style);
             let separator = Span::from("  ");
             let stack_element = Span::from(format!("{st}"));
-            let line = Line::from(vec![stack_index, separator, stack_element]);
-            text.push(line);
+            text.push(stack_index + separator + stack_element);
         }
         let paragraph = Paragraph::new(text).block(block).alignment(Alignment::Left);
         frame.render_widget(paragraph, render_area);
@@ -305,8 +304,7 @@ impl Home {
             ));
             let separator = Span::from("  ");
             let label = Span::from(state.program.label_for_address(call_address));
-            let line = Line::from(vec![addresses, separator, label]);
-            text.push(line);
+            text.push(addresses + separator + label);
         }
         let paragraph = Paragraph::new(text).block(block).alignment(Alignment::Left);
         frame.render_widget(paragraph, render_area);
@@ -345,8 +343,7 @@ impl Home {
             let sponge_index = Span::from(format!("{i:>3}")).dim();
             let separator = Span::from("  ");
             let sponge_element = Span::from(format!("{sp}"));
-            let line = Line::from(vec![sponge_index, separator, sponge_element]);
-            text.push(line);
+            text.push(sponge_index + separator + sponge_element);
         }
         let paragraph = Paragraph::new(text).block(block).alignment(Alignment::Left);
         frame.render_widget(paragraph, render_area);
@@ -379,7 +376,7 @@ impl Home {
         let input = state.vm_state.public_input.iter().join(", ");
         let input = Span::from(input);
         let footer = Span::from("]");
-        Some(Line::from(vec![header, colon, input, footer]))
+        Some(header + colon + input + footer)
     }
 
     fn render_secret_input_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
@@ -409,7 +406,7 @@ impl Home {
         let input = state.vm_state.secret_individual_tokens.iter().join(", ");
         let input = Span::from(input);
         let footer = Span::from("]");
-        Some(Line::from(vec![header, colon, input, footer]))
+        Some(header + colon + input + footer)
     }
 
     fn render_message_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
@@ -438,17 +435,17 @@ impl Home {
     }
 
     fn maybe_render_error_message(&self, state: &TritonVMState) -> Option<Line> {
-        let message = state.error?.to_string().into();
+        let message = Span::from(state.error?.to_string());
         let error = "ERROR".bold().red();
         let colon = ": ".into();
-        Some(Line::from(vec![error, colon, message]))
+        Some(error + colon + message)
     }
 
     fn maybe_render_warning_message(&self, state: &TritonVMState) -> Option<Line> {
-        let message = state.warning.as_ref()?.to_string().into();
+        let message = Span::from(state.warning.as_ref()?.to_string());
         let warning = "WARNING".bold().yellow();
         let colon = ": ".into();
-        Some(Line::from(vec![warning, colon, message]))
+        Some(warning + colon + message)
     }
 
     fn maybe_render_public_output(&self, state: &TritonVMState) -> Option<Line> {
@@ -460,13 +457,13 @@ impl Home {
         let output = state.vm_state.public_output.iter().join(", ");
         let output = Span::from(output);
         let footer = Span::from("]");
-        Some(Line::from(vec![header, colon, output, footer]))
+        Some(header + colon + output + footer)
     }
 
     fn render_welcome_message(&self) -> Line {
-        let welcome = "Welcome to the Triton VM TUI! ".into();
+        let welcome = Span::from("Welcome to the Triton VM TUI! ");
         let help_hint = "Press `h` for help.".dim();
-        Line::from(vec![welcome, help_hint])
+        welcome + help_hint
     }
 }
 
