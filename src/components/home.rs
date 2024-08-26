@@ -12,21 +12,26 @@ use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
 use triton_vm::instruction::*;
 use triton_vm::op_stack::NUM_OP_STACK_REGISTERS;
+use triton_vm::prelude::Program;
 use triton_vm::prelude::Tip5;
 
-use crate::action::*;
+use crate::action::Action;
+use crate::action::Toggle;
 use crate::element_type_hint::ElementTypeHint;
 use crate::triton_vm_state::TritonVMState;
 
 use super::Component;
 use super::Frame;
 
-#[derive(Debug, Copy, Clone, Arbitrary)]
+#[derive(Debug, Clone, Arbitrary)]
 pub(crate) struct Home {
     type_hints: bool,
     call_stack: bool,
     sponge: bool,
     inputs: bool,
+
+    /// Lazily pre-rendered program. Reduces rendering time for long programs.
+    rendered_program: Option<Vec<ProgramLine>>,
 }
 
 impl Default for Home {
@@ -36,13 +41,43 @@ impl Default for Home {
             call_stack: true,
             sponge: false,
             inputs: true,
+            rendered_program: None,
         }
     }
 }
 
 impl Home {
-    fn address_render_width(state: &TritonVMState) -> usize {
-        let max_address = state.program.len_bwords();
+    fn render_program(program: &Program) -> Vec<ProgramLine> {
+        let mut address = 0;
+        let mut rendered_program = vec![];
+        let mut has_breakpoint = false;
+        for instruction in program.labelled_instructions() {
+            let line = match instruction {
+                LabelledInstruction::TypeHint(_) => continue,
+                LabelledInstruction::Breakpoint => {
+                    has_breakpoint = true;
+                    continue;
+                }
+                LabelledInstruction::Label(label) => ProgramLine::Label(label),
+                LabelledInstruction::Instruction(instruction) => {
+                    let size = instruction.size();
+                    let line = ProgramLine::Instruction {
+                        address,
+                        has_breakpoint,
+                        instruction,
+                    };
+                    address += size;
+                    has_breakpoint = false;
+                    line
+                }
+            };
+            rendered_program.push(line);
+        }
+        rendered_program
+    }
+
+    fn address_render_width(program: &Program) -> usize {
+        let max_address = program.len_bwords();
         max_address.to_string().len()
     }
 
@@ -62,7 +97,7 @@ impl Home {
         self.set_all_widgets_visibility_to(!any_widget_is_shown);
     }
 
-    fn all_widget_visibilities(self) -> [bool; 4] {
+    fn all_widget_visibilities(&self) -> [bool; 4] {
         [self.type_hints, self.call_stack, self.sponge, self.inputs]
     }
 
@@ -73,7 +108,7 @@ impl Home {
         self.inputs = visibility;
     }
 
-    fn distribute_area_for_widgets(self, state: &TritonVMState, area: Rect) -> WidgetAreas {
+    fn distribute_area_for_widgets(&self, state: &TritonVMState, area: Rect) -> WidgetAreas {
         let public_input_height = if self.maybe_render_public_input(state).is_some() {
             Constraint::Length(2)
         } else {
@@ -127,7 +162,7 @@ impl Home {
         }
     }
 
-    fn render_op_stack_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_op_stack_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let op_stack = &render_info.state.vm_state.op_stack.stack;
         let render_area = render_info.areas.op_stack;
 
@@ -162,7 +197,7 @@ impl Home {
         frame.render_widget(paragraph, render_area);
     }
 
-    fn render_type_hint_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_type_hint_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         if !self.type_hints {
             return;
         }
@@ -193,81 +228,94 @@ impl Home {
         frame.render_widget(paragraph, render_area);
     }
 
-    fn render_program_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_program_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let state = &render_info.state;
-        let render_area = render_info.areas.program;
-
         let cycle_count = state.vm_state.cycle_count;
         let title = format!(" Program (cycle: {cycle_count:>5}) ");
         let title = Title::from(title).alignment(Alignment::Left);
-
-        let address_width = Self::address_render_width(state).max(2);
-        let mut address = 0;
-        let mut text = vec![];
-        let instruction_pointer = state.vm_state.instruction_pointer;
-        let mut line_number_of_ip = 0;
-        let mut is_breakpoint = false;
-        for labelled_instruction in state.program.labelled_instructions() {
-            if labelled_instruction == LabelledInstruction::Breakpoint {
-                is_breakpoint = true;
-                continue;
-            }
-            if let LabelledInstruction::TypeHint(_) = labelled_instruction {
-                continue;
-            }
-            let ip_points_here = instruction_pointer == address
-                && matches!(labelled_instruction, LabelledInstruction::Instruction(_));
-            if ip_points_here {
-                line_number_of_ip = text.len();
-            }
-            let ip = if ip_points_here {
-                Span::from("→").bold()
-            } else {
-                Span::from(" ")
-            };
-            let mut gutter_item = if is_breakpoint {
-                format!("{:>address_width$}  ", "🔴").into()
-            } else {
-                format!(" {address:>address_width$}  ").dim()
-            };
-            if let LabelledInstruction::Label(_) = labelled_instruction {
-                gutter_item = " ".into();
-            }
-            let instruction = Span::from(format!("{labelled_instruction}"));
-            let line = Line::from(vec![ip, gutter_item, instruction]);
-            text.push(line);
-            if let LabelledInstruction::Instruction(instruction) = labelled_instruction {
-                address += instruction.size();
-            }
-            is_breakpoint = false;
-        }
 
         let border_set = symbols::border::Set {
             top_left: symbols::line::ROUNDED.horizontal_down,
             bottom_left: symbols::line::ROUNDED.horizontal_up,
             ..symbols::border::ROUNDED
         };
-
         let block = Block::default()
             .padding(Padding::new(1, 1, 1, 0))
             .title(title)
             .borders(Borders::TOP | Borders::LEFT | Borders::BOTTOM)
             .border_set(border_set);
-        let render_area_for_lines = block.inner(render_area).height;
-        let num_total_lines = text.len() as u16;
-        let num_lines_to_show_at_top = render_area_for_lines / 2;
-        let maximum_scroll_amount = num_total_lines.saturating_sub(render_area_for_lines);
-        let num_lines_to_scroll = (line_number_of_ip as u16)
-            .saturating_sub(num_lines_to_show_at_top)
-            .min(maximum_scroll_amount);
 
-        let paragraph = Paragraph::new(text)
-            .block(block)
-            .scroll((num_lines_to_scroll, 0));
+        let render_area = render_info.areas.program;
+        let num_lines_to_render = usize::from(block.inner(render_area).height);
+        let ip = state.vm_state.instruction_pointer;
+        let Some(ref program) = self.rendered_program else {
+            let err = Paragraph::new("\nRendering program…".yellow()).centered();
+            frame.render_widget(err, render_area);
+            return;
+        };
+        let Some(idx_of_line_with_ip) = Self::line_index_of_address(program, ip) else {
+            let err = Paragraph::new(format!("\nNo instruction at address {ip}!").red()).centered();
+            frame.render_widget(err, render_area);
+            return;
+        };
+        let idx_of_first_line = idx_of_line_with_ip
+            .saturating_add(num_lines_to_render / 2)
+            .min(program.len())
+            .saturating_sub(num_lines_to_render);
+
+        let mut text = vec![];
+        let address_width = Self::address_render_width(&state.program);
+        for line in program
+            .iter()
+            .skip(idx_of_first_line)
+            .take(num_lines_to_render)
+        {
+            let rendered_line = match line {
+                ProgramLine::Label(label) => Line::from(format!(" {label}:")),
+                &ProgramLine::Instruction {
+                    address,
+                    has_breakpoint,
+                    ref instruction,
+                } => {
+                    let ip = if address == ip {
+                        "→".bold()
+                    } else {
+                        " ".into()
+                    };
+                    let gutter = if has_breakpoint {
+                        format!("{:>address_width$}  ", "🔴").into()
+                    } else {
+                        format!(" {address:>address_width$}  ").dim()
+                    };
+                    ip + gutter + Span::from(instruction.to_string())
+                }
+            };
+            text.push(rendered_line);
+        }
+
+        let paragraph = Paragraph::new(text).block(block);
         frame.render_widget(paragraph, render_area);
     }
 
-    fn render_call_stack_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    /// Requires the [`ProgramLine`]s to be sorted by their address. Variants
+    /// without an `address` field cannot be found this way.
+    fn line_index_of_address(lines: &[ProgramLine], address_to_find: usize) -> Option<usize> {
+        let indexed_instruction_lines = lines
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, line)| match line {
+                ProgramLine::Instruction { address, .. } => Some((idx, *address)),
+                ProgramLine::Label(_) => None,
+            })
+            .collect_vec();
+        let idx_idx = indexed_instruction_lines
+            .binary_search_by_key(&address_to_find, |&(_, address)| address)
+            .ok()?;
+        let (idx, _) = indexed_instruction_lines[idx_idx];
+        Some(idx)
+    }
+
+    fn render_call_stack_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         if !self.call_stack {
             return;
         }
@@ -295,7 +343,7 @@ impl Home {
         let num_padding_lines = num_available_lines.saturating_sub(jump_stack_depth);
         let mut text = vec![Line::from(""); num_padding_lines];
 
-        let address_width = Self::address_render_width(state);
+        let address_width = Self::address_render_width(&state.program);
         for (return_address, call_address) in jump_stack.iter().rev() {
             let return_address = return_address.value();
             let call_address = call_address.value();
@@ -310,7 +358,7 @@ impl Home {
         frame.render_widget(paragraph, render_area);
     }
 
-    fn render_sponge_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_sponge_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let title = Title::from(" Sponge ");
         let border_set = symbols::border::Set {
             top_left: symbols::line::ROUNDED.horizontal_down,
@@ -349,7 +397,7 @@ impl Home {
         frame.render_widget(paragraph, render_area);
     }
 
-    fn render_public_input_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_public_input_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let public_input = self
             .maybe_render_public_input(render_info.state)
             .unwrap_or_default();
@@ -367,7 +415,7 @@ impl Home {
         frame.render_widget(paragraph, render_info.areas.public_input);
     }
 
-    fn maybe_render_public_input(self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_public_input(&self, state: &TritonVMState) -> Option<Line> {
         if state.vm_state.public_input.is_empty() || !self.inputs {
             return None;
         }
@@ -379,7 +427,7 @@ impl Home {
         Some(header + colon + input + footer)
     }
 
-    fn render_secret_input_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_secret_input_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let secret_input = self
             .maybe_render_secret_input(render_info.state)
             .unwrap_or_default();
@@ -397,7 +445,7 @@ impl Home {
         frame.render_widget(paragraph, render_info.areas.secret_input);
     }
 
-    fn maybe_render_secret_input(self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_secret_input(&self, state: &TritonVMState) -> Option<Line> {
         if state.vm_state.secret_individual_tokens.is_empty() || !self.inputs {
             return None;
         }
@@ -409,7 +457,7 @@ impl Home {
         Some(header + colon + input + footer)
     }
 
-    fn render_message_widget(self, frame: &mut Frame<'_>, render_info: RenderInfo) {
+    fn render_message_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let message = self.message(render_info.state);
         let status = if render_info.state.vm_state.halting {
             Title::from(" HALT ".bold().green())
@@ -469,17 +517,21 @@ impl Home {
 
 impl Component for Home {
     fn update(&mut self, action: Action) -> Result<Option<Action>> {
-        if let Action::Toggle(toggle) = action {
-            self.toggle_widget(toggle);
+        match action {
+            Action::Toggle(toggle) => self.toggle_widget(toggle),
+            Action::Reset => self.rendered_program = None,
+            _ => (),
         }
         Ok(None)
     }
 
     fn draw(&mut self, frame: &mut Frame<'_>, state: &TritonVMState) -> Result<()> {
-        let widget_areas = self.distribute_area_for_widgets(state, frame.area());
+        self.rendered_program
+            .get_or_insert_with(|| Self::render_program(&state.program));
+
         let render_info = RenderInfo {
             state,
-            areas: widget_areas,
+            areas: self.distribute_area_for_widgets(state, frame.area()),
         };
 
         self.render_op_stack_widget(frame, render_info);
@@ -512,8 +564,19 @@ struct WidgetAreas {
     message_box: Rect,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Arbitrary)]
+enum ProgramLine {
+    Label(String),
+    Instruction {
+        address: usize,
+        has_breakpoint: bool,
+        instruction: AnInstruction<String>,
+    },
+}
+
 #[cfg(test)]
 mod tests {
+    use proptest::prop_assert_eq;
     use proptest_arbitrary_interop::arb;
     use ratatui::backend::TestBackend;
     use test_strategy::proptest;
@@ -540,5 +603,96 @@ mod tests {
         terminal
             .draw(|f| home.draw(f, &complete_state).unwrap())
             .unwrap();
+    }
+
+    #[proptest]
+    fn line_indices_of_empty_rendered_program_is_always_0(address: usize) {
+        prop_assert_eq!(None, Home::line_index_of_address(&[], address));
+    }
+
+    #[proptest]
+    fn searching_for_line_index_never_panics(#[strategy(arb())] program: Program, address: usize) {
+        let lines = Home::render_program(&program);
+        let _ = Home::line_index_of_address(&lines, address);
+    }
+
+    #[test]
+    fn line_indices_in_rendered_program_with_only_instructions_can_be_found() {
+        let instr = |address| ProgramLine::Instruction {
+            address,
+            has_breakpoint: false,
+            instruction: AnInstruction::Nop,
+        };
+        let lines = vec![instr(0), instr(1), instr(2), instr(3)];
+
+        assert_eq!(Some(0), Home::line_index_of_address(&lines, 0));
+        assert_eq!(Some(1), Home::line_index_of_address(&lines, 1));
+        assert_eq!(Some(2), Home::line_index_of_address(&lines, 2));
+        assert_eq!(Some(3), Home::line_index_of_address(&lines, 3));
+        assert_eq!(None, Home::line_index_of_address(&lines, 4));
+        assert_eq!(None, Home::line_index_of_address(&lines, 5));
+    }
+
+    #[test]
+    fn line_indices_in_rendered_program_starting_and_ending_with_labels_can_be_found() {
+        let instruction = |address| ProgramLine::Instruction {
+            address,
+            has_breakpoint: false,
+            instruction: AnInstruction::Nop,
+        };
+        let lines = vec![
+            ProgramLine::Label("start".to_string()),
+            instruction(0),
+            instruction(1),
+            ProgramLine::Label("middle".to_string()),
+            instruction(2),
+            instruction(3),
+            ProgramLine::Label("end".to_string()),
+        ];
+
+        assert_eq!(Some(1), Home::line_index_of_address(&lines, 0));
+        assert_eq!(Some(2), Home::line_index_of_address(&lines, 1));
+        assert_eq!(Some(4), Home::line_index_of_address(&lines, 2));
+        assert_eq!(Some(5), Home::line_index_of_address(&lines, 3));
+        assert_eq!(None, Home::line_index_of_address(&lines, 4));
+    }
+
+    #[test]
+    fn line_indices_in_rendered_program_with_many_labels_can_be_found() {
+        let instruction = |address| ProgramLine::Instruction {
+            address,
+            has_breakpoint: false,
+            instruction: AnInstruction::Nop,
+        };
+        let lines = vec![
+            instruction(0),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            ProgramLine::Label("label".to_string()),
+            instruction(2),
+        ];
+
+        assert_eq!(Some(0), Home::line_index_of_address(&lines, 0));
+        assert_eq!(None, Home::line_index_of_address(&lines, 1));
+        assert_eq!(Some(9), Home::line_index_of_address(&lines, 2));
+        assert_eq!(None, Home::line_index_of_address(&lines, 3));
+    }
+
+    #[test]
+    fn line_indices_in_rendered_program_containing_only_labels_can_never_be_found() {
+        let lines = vec![
+            ProgramLine::Label("start".to_string()),
+            ProgramLine::Label("middle".to_string()),
+            ProgramLine::Label("end".to_string()),
+        ];
+
+        assert_eq!(None, Home::line_index_of_address(&lines, 0));
+        assert_eq!(None, Home::line_index_of_address(&lines, 1));
+        assert_eq!(None, Home::line_index_of_address(&lines, 2));
     }
 }
