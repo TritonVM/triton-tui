@@ -10,19 +10,19 @@ use ratatui::prelude::*;
 pub(crate) struct ElementTypeHint {
     /// The name of the type. See [`TypeHint`][type_hint] for details.
     ///
-    /// [type_hint]: triton_vm::instruction::TypeHint
+    /// [type_hint]: triton_vm::isa::instruction::TypeHint
     pub type_name: Option<String>,
 
     /// The name of the variable. See [`TypeHint`][type_hint] for details.
     ///
-    /// [type_hint]: triton_vm::instruction::TypeHint
+    /// [type_hint]: triton_vm::isa::instruction::TypeHint
     pub variable_name: String,
 
     /// The index of the element within the type. For example, if the type is `Digest`, then this
     /// could be `0` for the first element, `1` for the second element, and so on.
     ///
-    /// Does not apply to types that are not composed of multiple [`BFieldElement`][bfe]s, like `u32` or
-    /// [`BFieldElement`][bfe] itself.
+    /// Does not apply to types that are not composed of multiple [`BFieldElement`][bfe]s,
+    /// like `u32` or [`BFieldElement`][bfe] itself.
     ///
     /// [bfe]: triton_vm::prelude::BFieldElement
     pub index: Option<usize>,

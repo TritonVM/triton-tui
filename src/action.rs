@@ -4,7 +4,7 @@ use arbitrary::Arbitrary;
 use itertools::Itertools;
 use serde::de::*;
 use serde::*;
-use triton_vm::instruction::Instruction;
+use triton_vm::isa::instruction::Instruction;
 
 use crate::mode::Mode;
 use crate::shadow_memory::TopOfStack;

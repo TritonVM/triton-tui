@@ -10,8 +10,8 @@ use ratatui::widgets::BorderType;
 use ratatui::widgets::Borders;
 use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
-use triton_vm::instruction::*;
-use triton_vm::op_stack::NUM_OP_STACK_REGISTERS;
+use triton_vm::isa::instruction::*;
+use triton_vm::isa::op_stack::NUM_OP_STACK_REGISTERS;
 use triton_vm::prelude::Program;
 use triton_vm::prelude::Tip5;
 

@@ -4,9 +4,9 @@ use std::iter::once;
 use color_eyre::eyre::bail;
 use color_eyre::eyre::Result;
 use itertools::Itertools;
-use triton_vm::instruction::*;
-use triton_vm::op_stack::NumberOfWords::*;
-use triton_vm::op_stack::*;
+use triton_vm::isa::instruction::*;
+use triton_vm::isa::op_stack::NumberOfWords;
+use triton_vm::isa::op_stack::*;
 use triton_vm::prelude::*;
 
 use crate::action::ExecutedInstruction;
@@ -85,6 +85,8 @@ impl ShadowMemory {
             Instruction::Pop(n) => _ = self.pop_n(n),
             Instruction::Push(_) => self.push(None),
             Instruction::Divine(n) => self.extend_by(n),
+            Instruction::Pick(n) => self.pick(n),
+            Instruction::Place(n) => self.place(n),
             Instruction::Dup(st) => self.dup(st),
             Instruction::Swap(st) => self.swap_top_with(st),
             Instruction::Halt => (),
@@ -98,7 +100,7 @@ impl ShadowMemory {
             Instruction::ReadMem(n) => self.read_mem(n, old_top_of_stack),
             Instruction::WriteMem(n) => self.write_mem(n, old_top_of_stack),
             Instruction::Hash => self.hash(),
-            Instruction::AssertVector => _ = self.pop_n(N5),
+            Instruction::AssertVector => _ = self.pop_n(NumberOfWords::N5),
             Instruction::SpongeInit => (),
             Instruction::SpongeAbsorb => self.sponge_absorb(),
             Instruction::SpongeAbsorbMem => self.sponge_absorb_mem(old_top_of_stack),
@@ -116,8 +118,8 @@ impl ShadowMemory {
             Instruction::Pow => self.binop(),
             Instruction::DivMod => self.div_mod(),
             Instruction::PopCount => self.unop(),
-            Instruction::XxAdd => _ = self.pop_n(N3),
-            Instruction::XxMul => _ = self.pop_n(N3),
+            Instruction::XxAdd => _ = self.pop_n(NumberOfWords::N3),
+            Instruction::XxMul => _ = self.pop_n(NumberOfWords::N3),
             Instruction::XInvert => self.x_invert(),
             Instruction::XbMul => self.xb_mul(),
             Instruction::ReadIo(n) => self.extend_by(n),
@@ -152,6 +154,18 @@ impl ShadowMemory {
         self.stack.drain(start_index..).rev().collect()
     }
 
+    fn pick(&mut self, n: OpStackElement) {
+        let picked_index = self.stack.len() - usize::from(n) - 1;
+        let picked_element = self.stack.remove(picked_index);
+        self.push(picked_element);
+    }
+
+    fn place(&mut self, n: OpStackElement) {
+        let top_of_stack = self.stack.pop().flatten();
+        let place_index = self.stack.len() - usize::from(n);
+        self.stack.insert(place_index, top_of_stack);
+    }
+
     fn dup(&mut self, st: OpStackElement) {
         let dup_index = self.stack.len() - usize::from(st) - 1;
         self.push(self.stack[dup_index].clone());
@@ -180,13 +194,14 @@ impl ShadowMemory {
     }
 
     fn hash(&mut self) {
-        let mut popped = self.pop_n(N5);
-        popped.extend(self.pop_n(N5));
-        self.extend_by(N5);
+        let mut popped = self.pop_n(NumberOfWords::N5);
+        popped.extend(self.pop_n(NumberOfWords::N5));
+        self.extend_by(NumberOfWords::N5);
 
         let all_hashed_elements = popped.iter().collect_vec();
 
-        let index_of_first_non_hashed_element = self.stack.len() - N5.num_words() - 1;
+        let index_of_first_non_hashed_element =
+            self.stack.len() - NumberOfWords::N5.num_words() - 1;
         let first_non_hashed_element = &self.stack[index_of_first_non_hashed_element];
         let all_hashed_and_first_non_hashed_elements = popped
             .iter()
@@ -213,8 +228,8 @@ impl ShadowMemory {
     }
 
     fn sponge_absorb(&mut self) {
-        self.pop_n(N5);
-        self.pop_n(N5);
+        self.pop_n(NumberOfWords::N5);
+        self.pop_n(NumberOfWords::N5);
     }
 
     fn sponge_absorb_mem(&mut self, old_top_of_stack: TopOfStack) {
@@ -231,8 +246,8 @@ impl ShadowMemory {
     }
 
     fn sponge_squeeze(&mut self) {
-        self.extend_by(N5);
-        self.extend_by(N5);
+        self.extend_by(NumberOfWords::N5);
+        self.extend_by(NumberOfWords::N5);
     }
 
     fn binop_maybe_keep_hint(&mut self) {
@@ -247,7 +262,7 @@ impl ShadowMemory {
     }
 
     fn binop(&mut self) {
-        self.pop_n(N2);
+        self.pop_n(NumberOfWords::N2);
         self.push(None);
     }
 
@@ -269,7 +284,7 @@ impl ShadowMemory {
 
     fn split(&mut self) {
         let maybe_type_hint = self.pop();
-        self.extend_by(N2);
+        self.extend_by(NumberOfWords::N2);
 
         let Some(type_hint) = maybe_type_hint else {
             return;
@@ -303,18 +318,18 @@ impl ShadowMemory {
     }
 
     fn div_mod(&mut self) {
-        self.pop_n(N2);
-        self.extend_by(N2);
+        self.pop_n(NumberOfWords::N2);
+        self.extend_by(NumberOfWords::N2);
     }
 
     fn x_invert(&mut self) {
-        self.pop_n(N3);
-        self.extend_by(N3);
+        self.pop_n(NumberOfWords::N3);
+        self.extend_by(NumberOfWords::N3);
     }
 
     fn xb_mul(&mut self) {
-        self.pop_n(N4);
-        self.extend_by(N3);
+        self.pop_n(NumberOfWords::N4);
+        self.extend_by(NumberOfWords::N3);
     }
 }
 
@@ -331,6 +346,7 @@ mod tests {
     use proptest::collection::vec;
     use proptest::prelude::*;
     use proptest_arbitrary_interop::arb;
+    use strum::EnumCount;
     use test_strategy::proptest;
 
     use super::*;
@@ -453,5 +469,38 @@ mod tests {
         let_assert!(Some(hint) = maybe_hint.clone());
         assert!(hint.type_name == Some("Digest".to_string()));
         assert!(hint.variable_name == "foo_hash".to_string());
+    }
+
+    #[proptest]
+    fn pick_then_place_and_place_then_pick_preserves_type_hints_on_stack(
+        #[filter(#type_hints.stack.len() >= OpStackElement::COUNT)] mut type_hints: ShadowMemory,
+        #[strategy(arb())] stack_element: OpStackElement,
+    ) {
+        let original_type_hints = type_hints.clone();
+
+        type_hints.pick(stack_element);
+        type_hints.place(stack_element);
+        prop_assert_eq!(&original_type_hints, &type_hints);
+
+        type_hints.place(stack_element);
+        type_hints.pick(stack_element);
+        prop_assert_eq!(original_type_hints, type_hints);
+    }
+
+    #[proptest]
+    fn place_then_pick_one_less_is_like_swap(
+        #[filter(#type_hints.stack.len() >= OpStackElement::COUNT)] mut type_hints: ShadowMemory,
+        #[strategy(arb())]
+        #[filter(#stack_element.index() != 0)]
+        stack_element: OpStackElement,
+    ) {
+        let mut type_hints_swap = type_hints.clone();
+        type_hints_swap.swap_top_with(stack_element);
+
+        let stack_element_one_higher = OpStackElement::try_from(stack_element.index() - 1).unwrap();
+
+        type_hints.place(stack_element);
+        type_hints.pick(stack_element_one_higher);
+        prop_assert_eq!(type_hints_swap, type_hints);
     }
 }

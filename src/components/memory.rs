@@ -9,7 +9,7 @@ use ratatui::widgets::BorderType;
 use ratatui::widgets::Borders;
 use ratatui::widgets::Padding;
 use ratatui::widgets::Paragraph;
-use triton_vm::instruction::Instruction;
+use triton_vm::isa::instruction::Instruction;
 use triton_vm::prelude::*;
 use tui_textarea::TextArea;
 
