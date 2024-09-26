@@ -3,6 +3,12 @@
 All notable changes are documented in this file.
 Lines marked “(!)” indicate a breaking change.
 
+## [0.3.1](https://github.com/TritonVM/triton-tui/compare/v0.3.0..v0.3.1) - 2024-09-26
+
+### ✨ Features
+
+- Upgrade to Triton VM v0.42.1
+
 ## [0.3.0](https://github.com/TritonVM/triton-tui/compare/v0.2.1..v0.3.0) - 2024-09-16
 
 ### ✨ Features
