@@ -12,6 +12,12 @@ homepage = "https://triton-vm.org/"
 repository = "https://github.com/TritonVM/triton-tui"
 documentation = "https://docs.rs/triton-tui/"
 
+[package.metadata.wix]
+upgrade-guid = "4B35A3BB-5E62-4D98-9548-7DB2141D4778"
+path-guid = "BC323872-190B-4363-9BE0-3952D2437AB3"
+license = false
+eula = false
+
 [dependencies]
 arbitrary = { version = "1", features = ["derive"] }
 better-panic = "0.3"
@@ -119,3 +125,8 @@ path = "src/main.rs"
 [[test]]
 name = "integration"
 path = "tests/tests.rs"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
