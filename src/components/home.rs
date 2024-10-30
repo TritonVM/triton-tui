@@ -4,7 +4,6 @@ use itertools::Itertools;
 use ratatui::prelude::*;
 use ratatui::style::Styled;
 use ratatui::widgets::block::Position;
-use ratatui::widgets::block::Title;
 use ratatui::widgets::Block;
 use ratatui::widgets::BorderType;
 use ratatui::widgets::Borders;
@@ -167,9 +166,6 @@ impl Home {
         let render_area = render_info.areas.op_stack;
 
         let stack_size = op_stack.len();
-        let title = format!(" Stack (size: {stack_size:>4}) ");
-        let title = Title::from(title).alignment(Alignment::Left);
-
         let border_set = symbols::border::Set {
             bottom_left: symbols::line::ROUNDED.vertical_right,
             ..symbols::border::ROUNDED
@@ -178,7 +174,7 @@ impl Home {
             .padding(Padding::new(1, 1, 1, 0))
             .borders(Borders::TOP | Borders::LEFT | Borders::BOTTOM)
             .border_set(border_set)
-            .title(title);
+            .title(format!(" Stack (size: {stack_size:>4}) "));
 
         let num_available_lines = block.inner(render_area).height as usize;
         let num_padding_lines = num_available_lines.saturating_sub(stack_size);
@@ -231,8 +227,6 @@ impl Home {
     fn render_program_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let state = &render_info.state;
         let cycle_count = state.vm_state.cycle_count;
-        let title = format!(" Program (cycle: {cycle_count:>5}) ");
-        let title = Title::from(title).alignment(Alignment::Left);
 
         let border_set = symbols::border::Set {
             top_left: symbols::line::ROUNDED.horizontal_down,
@@ -241,7 +235,7 @@ impl Home {
         };
         let block = Block::default()
             .padding(Padding::new(1, 1, 1, 0))
-            .title(title)
+            .title(format!(" Program (cycle: {cycle_count:>5}) "))
             .borders(Borders::TOP | Borders::LEFT | Borders::BOTTOM)
             .border_set(border_set);
 
@@ -324,9 +318,6 @@ impl Home {
         let jump_stack = &state.vm_state.jump_stack;
 
         let jump_stack_depth = jump_stack.len();
-        let title = format!(" Calls (depth: {jump_stack_depth:>3}) ");
-        let title = Title::from(title).alignment(Alignment::Left);
-
         let border_set = symbols::border::Set {
             top_left: symbols::line::ROUNDED.horizontal_down,
             bottom_left: symbols::line::ROUNDED.horizontal_up,
@@ -334,7 +325,7 @@ impl Home {
         };
         let block = Block::default()
             .padding(Padding::new(1, 1, 1, 0))
-            .title(title)
+            .title(format!(" Calls (depth: {jump_stack_depth:>3}) "))
             .borders(Borders::TOP | Borders::LEFT | Borders::BOTTOM)
             .border_set(border_set);
         let render_area = render_info.areas.call_stack;
@@ -359,7 +350,6 @@ impl Home {
     }
 
     fn render_sponge_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
-        let title = Title::from(" Sponge ");
         let border_set = symbols::border::Set {
             top_left: symbols::line::ROUNDED.horizontal_down,
             bottom_left: symbols::line::ROUNDED.horizontal_up,
@@ -374,7 +364,7 @@ impl Home {
         let block = Block::default()
             .borders(borders)
             .border_set(border_set)
-            .title(title)
+            .title(" Sponge ")
             .padding(Padding::new(1, 1, 1, 0));
 
         let render_area = render_info.areas.sponge;
@@ -460,9 +450,9 @@ impl Home {
     fn render_message_widget(&self, frame: &mut Frame<'_>, render_info: RenderInfo) {
         let message = self.message(render_info.state);
         let status = if render_info.state.vm_state.halting {
-            Title::from(" HALT ".bold().green())
+            " HALT ".bold().green()
         } else {
-            Title::default()
+            Span::default()
         };
 
         let block = Block::default()
