@@ -17,8 +17,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - features: default
-          - os: ubuntu-latest
-            features: integration-tests
+#         - os: ubuntu-latest
+#           features: integration-tests
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository

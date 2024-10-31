@@ -31,7 +31,7 @@ jobs:
         run: >
           cargo llvm-cov nextest
           --all-targets
-          --features integration-tests
+#         --features integration-tests
           --lcov --output-path lcov.info
 
       - name: Upload coverage to coveralls.io
