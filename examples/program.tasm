@@ -30,7 +30,7 @@ my_loop:
 
 check_result:                       // Try enabling
     // pop 1                        // <- this line for
-    assert                          // <- this assertion to work.
+    assert error_id -17             // <- this assertion to work.
     return                          // Hot reload & reset of the VM is `r`.
 
 write_to_memory:

@@ -404,8 +404,7 @@ mod tests {
     #[proptest]
     fn render_arbitrary_vm_state(
         arb_memory: ArbitraryMemory,
-        #[strategy(arb())] program: Program,
-        #[strategy(arb())] mut vm_state: VMState,
+        #[strategy(arb())] vm_state: VMState,
     ) {
         let mut memory = Memory {
             most_recent_address: arb_memory.most_recent_address,
@@ -416,10 +415,8 @@ mod tests {
             undo_stack: arb_memory.undo_stack,
         };
 
-        vm_state.program.clone_from(&program.instructions);
         let mut complete_state = TritonVMState::new(&TuiArgs::default()).unwrap();
         complete_state.vm_state = vm_state;
-        complete_state.program = program;
 
         let backend = TestBackend::new(150, 50);
         let mut terminal = Terminal::new(backend)?;

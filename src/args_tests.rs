@@ -50,12 +50,10 @@ pub fn args_for_test_program_with_test_input() -> TuiArgs {
 }
 
 pub fn args_for_test_program_with_initial_state() -> TuiArgs {
-    let program_path = format!("{MANIFEST_DIR}/{EXAMPLE_PROGRAM_PATH}");
     let initial_state_path = format!("{MANIFEST_DIR}/{EXAMPLE_INITIAL_STATE_PATH}");
 
     let args = [
         binary_name(),
-        vec![program_path],
         vec!["--initial-state".into(), initial_state_path],
     ]
     .concat();
@@ -105,9 +103,9 @@ fn argument_program_and_public_input_and_secret_input_is_valid() {
 }
 
 #[test]
-fn argument_program_and_initial_state_is_valid() {
+fn argument_initial_state_conflicts_with_program() {
     let args = [binary_name(), tui_arg_program(), tui_arg_initial_state()].concat();
-    TuiArgs::parse_from(args);
+    let_assert!(Err(_) = TuiArgs::try_parse_from(args));
 }
 
 #[test]

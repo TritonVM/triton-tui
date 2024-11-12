@@ -69,6 +69,7 @@ impl Home {
                     has_breakpoint = false;
                     line
                 }
+                LabelledInstruction::AssertionContext(ctx) => ProgramLine::AssertionContext(ctx),
             };
             rendered_program.push(line);
         }
@@ -257,8 +258,8 @@ impl Home {
             .min(program.len())
             .saturating_sub(num_lines_to_render);
 
-        let mut text = vec![];
-        let address_width = Self::address_render_width(&state.program);
+        let mut text = Vec::<Line>::new();
+        let address_width = Self::address_render_width(&state.vm_state.program);
         for line in program
             .iter()
             .skip(idx_of_first_line)
@@ -283,6 +284,13 @@ impl Home {
                     };
                     ip + gutter + Span::from(instruction.to_string())
                 }
+                &ProgramLine::AssertionContext(AssertionContext::ID(id)) => {
+                    if let Some(line) = text.last_mut() {
+                        line.push_span(format!(" error_id {id}"));
+                    };
+                    continue;
+                }
+                &ProgramLine::AssertionContext(_) => continue,
             };
             text.push(rendered_line);
         }
@@ -299,7 +307,7 @@ impl Home {
             .enumerate()
             .filter_map(|(idx, line)| match line {
                 ProgramLine::Instruction { address, .. } => Some((idx, *address)),
-                ProgramLine::Label(_) => None,
+                ProgramLine::Label(_) | ProgramLine::AssertionContext(_) => None,
             })
             .collect_vec();
         let idx_idx = indexed_instruction_lines
@@ -334,7 +342,7 @@ impl Home {
         let num_padding_lines = num_available_lines.saturating_sub(jump_stack_depth);
         let mut text = vec![Line::from(""); num_padding_lines];
 
-        let address_width = Self::address_render_width(&state.program);
+        let address_width = Self::address_render_width(&state.vm_state.program);
         for (return_address, call_address) in jump_stack.iter().rev() {
             let return_address = return_address.value();
             let call_address = call_address.value();
@@ -342,7 +350,7 @@ impl Home {
                 "({return_address:>address_width$}, {call_address:>address_width$})"
             ));
             let separator = Span::from("  ");
-            let label = Span::from(state.program.label_for_address(call_address));
+            let label = Span::from(state.vm_state.program.label_for_address(call_address));
             text.push(addresses + separator + label);
         }
         let paragraph = Paragraph::new(text).block(block).alignment(Alignment::Left);
@@ -473,7 +481,7 @@ impl Home {
     }
 
     fn maybe_render_error_message(&self, state: &TritonVMState) -> Option<Line> {
-        let message = Span::from(state.error?.to_string());
+        let message = Span::from(state.error.as_ref()?.to_string());
         let error = "ERROR".bold().red();
         let colon = ": ".into();
         Some(error + colon + message)
@@ -517,7 +525,7 @@ impl Component for Home {
 
     fn draw(&mut self, frame: &mut Frame<'_>, state: &TritonVMState) -> Result<()> {
         self.rendered_program
-            .get_or_insert_with(|| Self::render_program(&state.program));
+            .get_or_insert_with(|| Self::render_program(&state.vm_state.program));
 
         let render_info = RenderInfo {
             state,
@@ -562,6 +570,7 @@ enum ProgramLine {
         has_breakpoint: bool,
         instruction: AnInstruction<String>,
     },
+    AssertionContext(AssertionContext),
 }
 
 #[cfg(test)]
@@ -579,14 +588,10 @@ mod tests {
     #[proptest]
     fn render_arbitrary_vm_state(
         #[strategy(arb())] mut home: Home,
-        #[strategy(arb())] program: Program,
-        #[strategy(arb())] mut vm_state: VMState,
+        #[strategy(arb())] vm_state: VMState,
     ) {
-        vm_state.program.clone_from(&program.instructions);
-
         let mut complete_state = TritonVMState::new(&TuiArgs::default()).unwrap();
         complete_state.vm_state = vm_state;
-        complete_state.program = program;
 
         let backend = TestBackend::new(150, 50);
         let mut terminal = Terminal::new(backend)?;

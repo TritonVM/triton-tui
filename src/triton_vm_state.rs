@@ -14,6 +14,7 @@ use triton_vm::isa::op_stack::NUM_OP_STACK_REGISTERS;
 use triton_vm::prelude::*;
 
 use crate::action::*;
+use crate::args::InputArgs;
 use crate::args::TuiArgs;
 use crate::components::Component;
 use crate::shadow_memory::ShadowMemory;
@@ -23,7 +24,6 @@ use crate::shadow_memory::TopOfStack;
 pub(crate) struct TritonVMState {
     pub action_tx: Option<UnboundedSender<Action>>,
 
-    pub program: Program,
     pub vm_state: VMState,
 
     pub type_hints: ShadowMemory,
@@ -44,12 +44,13 @@ pub(crate) struct UndoInformation {
 
 impl TritonVMState {
     pub fn new(args: &TuiArgs) -> Result<Self> {
-        let program = Self::program_from_args(args)?;
-        let vm_state = if args.initial_state.is_some() {
-            Self::vm_state_from_initial_state(args, &program)?
+        let vm_state = if let Some(ref input_args) = args.input_args {
+            let program = Self::program_from_args(input_args)?;
+            Self::vm_state_with_specified_input(input_args, program)?
         } else {
-            Self::vm_state_with_specified_input(args, &program)?
+            Self::vm_state_from_initial_state(args)?
         };
+
         let type_hints = if args.initial_state.is_some() {
             ShadowMemory::new_for_initial_state(&vm_state)
         } else {
@@ -58,7 +59,6 @@ impl TritonVMState {
 
         let mut state = Self {
             action_tx: None,
-            program,
             vm_state,
             type_hints,
             undo_stack: vec![],
@@ -71,40 +71,32 @@ impl TritonVMState {
         Ok(state)
     }
 
-    fn program_from_args(args: &TuiArgs) -> Result<Program> {
+    fn program_from_args(args: &InputArgs) -> Result<Program> {
         let source_code = fs::read_to_string(&args.program)?;
         let program = Program::from_code(&source_code)
             .map_err(|err| anyhow!("program parsing error: {err}"))?;
         Ok(program)
     }
 
-    fn vm_state_from_initial_state(args: &TuiArgs, program: &Program) -> Result<VMState> {
+    fn vm_state_from_initial_state(args: &TuiArgs) -> Result<VMState> {
         let Some(ref initial_state_path) = args.initial_state else {
             let error_desc = "path to initial state must exist";
             error!(error_desc);
             bail!(error_desc);
         };
         let file = fs::File::open(initial_state_path)?;
-        let initial_state: VMState = serde_json::from_reader(file)?;
-        if program.instructions != initial_state.program {
-            let error_desc = "given program must match program of given initial state";
-            error!(error_desc);
-            bail!(error_desc);
-        }
-        Ok(initial_state)
+
+        Ok(serde_json::from_reader(file)?)
     }
 
-    fn vm_state_with_specified_input(args: &TuiArgs, program: &Program) -> Result<VMState> {
+    fn vm_state_with_specified_input(args: &InputArgs, program: Program) -> Result<VMState> {
         let public_input = Self::public_input_from_args(args)?;
         let non_determinism = Self::non_determinism_from_args(args)?;
         let vm_state = VMState::new(program, public_input, non_determinism);
         Ok(vm_state)
     }
 
-    fn public_input_from_args(args: &TuiArgs) -> Result<PublicInput> {
-        let Some(ref input_args) = args.input_args else {
-            return Ok(PublicInput::default());
-        };
+    fn public_input_from_args(input_args: &InputArgs) -> Result<PublicInput> {
         let Some(ref input_path) = input_args.input else {
             return Ok(PublicInput::default());
         };
@@ -118,10 +110,7 @@ impl TritonVMState {
         Ok(PublicInput::new(elements))
     }
 
-    fn non_determinism_from_args(args: &TuiArgs) -> Result<NonDeterminism> {
-        let Some(ref input_args) = args.input_args else {
-            return Ok(NonDeterminism::default());
-        };
+    fn non_determinism_from_args(input_args: &InputArgs) -> Result<NonDeterminism> {
         let Some(ref non_determinism_path) = input_args.non_determinism else {
             return Ok(NonDeterminism::default());
         };
@@ -148,12 +137,12 @@ impl TritonVMState {
 
     fn at_breakpoint(&self) -> bool {
         let ip = self.vm_state.instruction_pointer as u64;
-        self.program.is_breakpoint(ip)
+        self.vm_state.program.is_breakpoint(ip)
     }
 
     fn apply_type_hints(&mut self) {
         let ip = self.vm_state.instruction_pointer as u64;
-        for type_hint in self.program.type_hints_at(ip) {
+        for type_hint in self.vm_state.program.type_hints_at(ip) {
             let maybe_error = self.type_hints.apply_type_hint(type_hint);
             if let Err(report) = maybe_error {
                 info!("Error applying type hint: {report}");
@@ -329,9 +318,9 @@ mod tests {
     /// In case the serialization of the initial state changes, use this to re-generate it.
     #[test]
     fn serialize_example_program_and_input_to_json() {
-        let args = args_for_test_program_with_test_input();
+        let args = args_for_test_program_with_test_input().input_args.unwrap();
         let program = TritonVMState::program_from_args(&args).unwrap();
-        let mut state = TritonVMState::vm_state_with_specified_input(&args, &program).unwrap();
+        let mut state = TritonVMState::vm_state_with_specified_input(&args, program).unwrap();
         while state.op_stack.len() <= NUM_OP_STACK_REGISTERS + 4 {
             state.step().unwrap();
         }

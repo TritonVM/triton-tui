@@ -1,203 +1,338 @@
 {
-  "program": [
-    {
-      "Push": 3
+  "program": {
+    "instructions": [
+      {
+        "Push": 3
+      },
+      {
+        "Push": 3
+      },
+      {
+        "Call": 15
+      },
+      {
+        "Call": 15
+      },
+      {
+        "Call": 36
+      },
+      {
+        "Call": 36
+      },
+      {
+        "Call": 38
+      },
+      {
+        "Call": 38
+      },
+      {
+        "Call": 45
+      },
+      {
+        "Call": 45
+      },
+      {
+        "Call": 62
+      },
+      {
+        "Call": 62
+      },
+      {
+        "Call": 54
+      },
+      {
+        "Call": 54
+      },
+      "Halt",
+      {
+        "Dup": "ST0"
+      },
+      {
+        "Dup": "ST0"
+      },
+      {
+        "Push": 0
+      },
+      {
+        "Push": 0
+      },
+      "Eq",
+      "Skiz",
+      "Return",
+      {
+        "ReadIo": "N3"
+      },
+      {
+        "ReadIo": "N3"
+      },
+      "Mul",
+      "Mul",
+      {
+        "Dup": "ST0"
+      },
+      {
+        "Dup": "ST0"
+      },
+      {
+        "WriteIo": "N1"
+      },
+      {
+        "WriteIo": "N1"
+      },
+      {
+        "Swap": "ST1"
+      },
+      {
+        "Swap": "ST1"
+      },
+      {
+        "Push": 18446744069414584320
+      },
+      {
+        "Push": 18446744069414584320
+      },
+      "Add",
+      "Recurse",
+      "Assert",
+      "Return",
+      {
+        "Push": 42
+      },
+      {
+        "Push": 42
+      },
+      {
+        "WriteMem": "N2"
+      },
+      {
+        "WriteMem": "N2"
+      },
+      {
+        "Pop": "N1"
+      },
+      {
+        "Pop": "N1"
+      },
+      "Return",
+      {
+        "Divine": "N3"
+      },
+      {
+        "Divine": "N3"
+      },
+      "Mul",
+      "Mul",
+      {
+        "Swap": "ST5"
+      },
+      {
+        "Swap": "ST5"
+      },
+      "MerkleStep",
+      "MerkleStep",
+      "Return",
+      "SpongeInit",
+      {
+        "Push": 42
+      },
+      {
+        "Push": 42
+      },
+      "SpongeAbsorbMem",
+      {
+        "Pop": "N1"
+      },
+      {
+        "Pop": "N1"
+      },
+      "SpongeSqueeze",
+      "Return",
+      {
+        "Push": 0
+      },
+      {
+        "Push": 0
+      },
+      {
+        "Swap": "ST5"
+      },
+      {
+        "Swap": "ST5"
+      },
+      {
+        "Push": 3
+      },
+      {
+        "Push": 3
+      },
+      {
+        "Swap": "ST5"
+      },
+      {
+        "Swap": "ST5"
+      },
+      {
+        "Call": 73
+      },
+      {
+        "Call": 73
+      },
+      "Return",
+      {
+        "Swap": "ST6"
+      },
+      {
+        "Swap": "ST6"
+      },
+      {
+        "Push": 1
+      },
+      {
+        "Push": 1
+      },
+      "Add",
+      {
+        "Swap": "ST6"
+      },
+      {
+        "Swap": "ST6"
+      },
+      "RecurseOrReturn"
+    ],
+    "address_to_label": {
+      "15": "my_loop",
+      "36": "check_result",
+      "62": "recursive_function",
+      "38": "write_to_memory",
+      "54": "sponge_instructions",
+      "73": "actual_recursion_loop",
+      "45": "read_from_secret_input"
     },
-    {
-      "Push": 3
-    },
-    {
-      "Call": 15
-    },
-    {
-      "Call": 15
-    },
-    {
-      "Call": 36
-    },
-    {
-      "Call": 36
-    },
-    {
-      "Call": 38
-    },
-    {
-      "Call": 38
-    },
-    {
-      "Call": 45
-    },
-    {
-      "Call": 45
-    },
-    {
-      "Call": 62
-    },
-    {
-      "Call": 62
-    },
-    {
-      "Call": 54
-    },
-    {
-      "Call": 54
-    },
-    "Halt",
-    {
-      "Dup": "ST0"
-    },
-    {
-      "Dup": "ST0"
-    },
-    {
-      "Push": 0
-    },
-    {
-      "Push": 0
-    },
-    "Eq",
-    "Skiz",
-    "Return",
-    {
-      "ReadIo": "N3"
-    },
-    {
-      "ReadIo": "N3"
-    },
-    "Mul",
-    "Mul",
-    {
-      "Dup": "ST0"
-    },
-    {
-      "Dup": "ST0"
-    },
-    {
-      "WriteIo": "N1"
-    },
-    {
-      "WriteIo": "N1"
-    },
-    {
-      "Swap": "ST1"
-    },
-    {
-      "Swap": "ST1"
-    },
-    {
-      "Push": 18446744069414584320
-    },
-    {
-      "Push": 18446744069414584320
-    },
-    "Add",
-    "Recurse",
-    "Assert",
-    "Return",
-    {
-      "Push": 42
-    },
-    {
-      "Push": 42
-    },
-    {
-      "WriteMem": "N2"
-    },
-    {
-      "WriteMem": "N2"
-    },
-    {
-      "Pop": "N1"
-    },
-    {
-      "Pop": "N1"
-    },
-    "Return",
-    {
-      "Divine": "N3"
-    },
-    {
-      "Divine": "N3"
-    },
-    "Mul",
-    "Mul",
-    {
-      "Swap": "ST5"
-    },
-    {
-      "Swap": "ST5"
-    },
-    "MerkleStep",
-    "MerkleStep",
-    "Return",
-    "SpongeInit",
-    {
-      "Push": 42
-    },
-    {
-      "Push": 42
-    },
-    "SpongeAbsorbMem",
-    {
-      "Pop": "N1"
-    },
-    {
-      "Pop": "N1"
-    },
-    "SpongeSqueeze",
-    "Return",
-    {
-      "Push": 0
-    },
-    {
-      "Push": 0
-    },
-    {
-      "Swap": "ST5"
-    },
-    {
-      "Swap": "ST5"
-    },
-    {
-      "Push": 3
-    },
-    {
-      "Push": 3
-    },
-    {
-      "Swap": "ST5"
-    },
-    {
-      "Swap": "ST5"
-    },
-    {
-      "Call": 73
-    },
-    {
-      "Call": 73
-    },
-    "Return",
-    {
-      "Swap": "ST6"
-    },
-    {
-      "Swap": "ST6"
-    },
-    {
-      "Push": 1
-    },
-    {
-      "Push": 1
-    },
-    "Add",
-    {
-      "Swap": "ST6"
-    },
-    {
-      "Swap": "ST6"
-    },
-    "RecurseOrReturn"
-  ],
+    "debug_information": {
+      "breakpoints": [
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "type_hints": {
+        "4": [
+          {
+            "starting_index": 1,
+            "length": 3,
+            "type_name": "array",
+            "variable_name": "numbers"
+          }
+        ],
+        "66": [
+          {
+            "starting_index": 5,
+            "length": 1,
+            "type_name": null,
+            "variable_name": "loop_counter"
+          }
+        ],
+        "70": [
+          {
+            "starting_index": 5,
+            "length": 1,
+            "type_name": null,
+            "variable_name": "termination_condition"
+          }
+        ],
+        "2": [
+          {
+            "starting_index": 0,
+            "length": 1,
+            "type_name": null,
+            "variable_name": "loop_counter"
+          }
+        ]
+      },
+      "assertion_context": {
+        "36": {
+          "ID": -17
+        }
+      }
+    }
+  },
   "public_input": [
     1,
     1,
@@ -223,11 +358,11 @@
   "ram_calls": [],
   "op_stack": {
     "stack": [
-      12017882345305357079,
-      5222704870525827820,
-      10467712582664260989,
-      15878964160176206094,
-      11355009393414670704,
+      387984413592480277,
+      16917782556040125758,
+      11437686079882926734,
+      1535299305662495234,
+      7064452302685790841,
       0,
       0,
       0,

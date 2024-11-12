@@ -45,7 +45,7 @@ tokio-util = "0.7"
 tracing = "0.1"
 tracing-error = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "serde"] }
-triton-vm = "=0.42.1"
+triton-vm = "=0.43.0"
 tui-textarea = "0.7"
 
 [dev-dependencies]

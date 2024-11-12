@@ -24,21 +24,18 @@ lazy_static! {
     pub(crate) static ref LOG_FILE: String = format!("{}.log", env!("CARGO_PKG_NAME"));
 }
 
-pub(crate) const DEFAULT_INTERRUPT_CYCLE: u32 = 100_000;
+pub(crate) const DEFAULT_INTERRUPT_CYCLE: u32 = 1_000_000;
 pub(crate) const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 pub(crate) const EXAMPLE_PROGRAM_PATH: &str = "examples/program.tasm";
 
 #[derive(Debug, Clone, PartialEq, Parser)]
 #[command(author, version = version(), about)]
 pub(crate) struct TuiArgs {
-    /// File containing the program to run
-    pub program: String,
-
     #[command(flatten)]
     pub input_args: Option<InputArgs>,
 
     /// JSON file containing entire initial state
-    #[arg(long, value_name = "PATH", group = "state")]
+    #[arg(long, value_name = "file", group = "state")]
     pub initial_state: Option<String>,
 
     /// The maximum number of cycles to run after any interaction,
@@ -55,21 +52,28 @@ pub(crate) struct TuiArgs {
 #[derive(Debug, Clone, PartialEq, Args)]
 #[group(required = false, multiple = true, conflicts_with = "state")]
 pub(crate) struct InputArgs {
+    /// File containing the program to run
+    pub program: String,
+
     /// File containing public input
-    #[arg(short, long, value_name = "PATH")]
+    #[arg(short, long, value_name = "file")]
     pub input: Option<String>,
 
     /// JSON file containing all non-determinism
-    #[arg(short, long, value_name = "PATH")]
+    #[arg(short, long, value_name = "file")]
     pub non_determinism: Option<String>,
 }
 
 impl Default for TuiArgs {
     fn default() -> Self {
         let program = format!("{MANIFEST_DIR}/{EXAMPLE_PROGRAM_PATH}");
-        Self {
+        let input_args = Some(InputArgs {
             program,
-            input_args: None,
+            input: None,
+            non_determinism: None,
+        });
+        Self {
+            input_args,
             initial_state: None,
             interrupt_cycle: DEFAULT_INTERRUPT_CYCLE,
         }

@@ -15,11 +15,11 @@ _triton-tui() {
 
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" : \
-'-i+[File containing public input]:PATH: ' \
-'--input=[File containing public input]:PATH: ' \
-'-n+[JSON file containing all non-determinism]:PATH: ' \
-'--non-determinism=[JSON file containing all non-determinism]:PATH: ' \
-'--initial-state=[JSON file containing entire initial state]:PATH: ' \
+'-i+[File containing public input]:file: ' \
+'--input=[File containing public input]:file: ' \
+'-n+[JSON file containing all non-determinism]:file: ' \
+'--non-determinism=[JSON file containing all non-determinism]:file: ' \
+'--initial-state=[JSON file containing entire initial state]:file: ' \
 '--interrupt-cycle=[The maximum number of cycles to run after any interaction, preventing a frozen TUI in infinite loops]:u32: ' \
 '-h[Print help]' \
 '--help[Print help]' \
