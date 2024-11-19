@@ -241,7 +241,7 @@ impl Home {
             .border_set(border_set);
 
         let render_area = render_info.areas.program;
-        let num_lines_to_render = usize::from(block.inner(render_area).height);
+        let render_area_height = usize::from(block.inner(render_area).height);
         let ip = state.vm_state.instruction_pointer;
         let Some(ref program) = self.rendered_program else {
             let err = Paragraph::new("\nRendering program…".yellow()).centered();
@@ -254,16 +254,19 @@ impl Home {
             return;
         };
         let idx_of_first_line = idx_of_line_with_ip
-            .saturating_add(num_lines_to_render / 2)
+            .saturating_add(render_area_height / 2)
             .min(program.len())
-            .saturating_sub(num_lines_to_render);
+            .saturating_sub(render_area_height);
 
         let mut text = Vec::<Line>::new();
         let address_width = Self::address_render_width(&state.vm_state.program);
+
+        // a bit of overdraw is better than empty lines
+        let num_lines_with_overdraw = 2 * render_area_height;
         for line in program
             .iter()
             .skip(idx_of_first_line)
-            .take(num_lines_to_render)
+            .take(num_lines_with_overdraw)
         {
             let rendered_line = match line {
                 ProgramLine::Label(label) => Line::from(format!(" {label}:")),
