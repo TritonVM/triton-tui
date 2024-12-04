@@ -80,7 +80,7 @@ impl<'de> Deserialize<'de> for Action {
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         struct ActionVisitor;
 
-        impl<'de> Visitor<'de> for ActionVisitor {
+        impl Visitor<'_> for ActionVisitor {
             type Value = Action;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

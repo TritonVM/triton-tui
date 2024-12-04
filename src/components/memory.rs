@@ -53,7 +53,7 @@ struct WidgetAreas {
     text_input: Rect,
 }
 
-impl<'a> Default for Memory<'a> {
+impl Default for Memory<'_> {
     fn default() -> Self {
         Self {
             most_recent_address: 0_u64.into(),
@@ -302,7 +302,7 @@ impl<'a> Memory<'a> {
     }
 }
 
-impl<'a> Component for Memory<'a> {
+impl Component for Memory<'_> {
     fn request_exclusive_key_event_handling(&self) -> bool {
         self.text_area_in_focus
     }
