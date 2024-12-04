@@ -34,7 +34,8 @@ pub(crate) struct TuiArgs {
     #[command(flatten)]
     pub input_args: Option<InputArgs>,
 
-    /// JSON file containing entire initial state
+    /// JSON file containing an entire VM state, including program and inputs.
+    /// Conflicts with command line options program, input, and non-determinism.
     #[arg(long, value_name = "file", group = "state")]
     pub initial_state: Option<String>,
 
