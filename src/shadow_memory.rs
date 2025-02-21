@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::iter::once;
 
-use color_eyre::eyre::bail;
 use color_eyre::eyre::Result;
+use color_eyre::eyre::bail;
 use itertools::Itertools;
 use triton_vm::isa::instruction::*;
 use triton_vm::isa::op_stack::NumberOfWords;

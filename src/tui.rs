@@ -2,16 +2,16 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::time::Duration;
 
-use color_eyre::eyre::bail;
 use color_eyre::eyre::Result;
+use color_eyre::eyre::bail;
 use crossterm::event::Event as CrosstermEvent;
 use crossterm::event::*;
 use crossterm::terminal::*;
 use crossterm::tty::IsTty;
 use crossterm::*;
 use futures::*;
-use ratatui::backend::CrosstermBackend as Backend;
 use ratatui::Terminal;
+use ratatui::backend::CrosstermBackend as Backend;
 use serde::Deserialize;
 use serde::Serialize;
 use tokio::sync::mpsc::*;

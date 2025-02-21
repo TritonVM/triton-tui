@@ -10,9 +10,9 @@ use derive_deref::DerefMut;
 use ratatui::style::Color;
 use ratatui::style::Modifier;
 use ratatui::style::Style;
+use serde::Deserialize;
 use serde::de::Deserializer;
 use serde::de::Error;
-use serde::Deserialize;
 use tracing::error;
 use tracing::info;
 

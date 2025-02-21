@@ -2,11 +2,11 @@ use std::fmt::Display;
 
 use arbitrary::Arbitrary;
 use color_eyre::eyre::Result;
+use ratatui::Frame;
 use ratatui::layout::Flex;
 use ratatui::prelude::*;
-use ratatui::widgets::block::*;
 use ratatui::widgets::Paragraph;
-use ratatui::Frame;
+use ratatui::widgets::block::*;
 
 use crate::action::Action;
 use crate::components::Component;

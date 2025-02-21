@@ -5,7 +5,8 @@ version = "0.4.0"
 description = "Terminal User Interface to help debugging programs written for Triton VM."
 readme = "README.md"
 
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 authors = ["Triton Software AG"]
 license = "Apache-2.0"
 homepage = "https://triton-vm.org/"

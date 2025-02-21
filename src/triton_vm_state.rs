@@ -1,7 +1,7 @@
+use color_eyre::Report;
+use color_eyre::eyre::Result;
 use color_eyre::eyre::anyhow;
 use color_eyre::eyre::bail;
-use color_eyre::eyre::Result;
-use color_eyre::Report;
 use fs_err as fs;
 use itertools::Itertools;
 use tokio::sync::mpsc::UnboundedSender;

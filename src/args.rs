@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
-use clap::value_parser;
 use clap::Args;
 use clap::Parser;
+use clap::value_parser;
 use directories::ProjectDirs;
 use lazy_static::lazy_static;
 

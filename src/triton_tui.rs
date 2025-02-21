@@ -10,10 +10,10 @@ use tokio::sync::mpsc::UnboundedSender;
 
 use crate::action::*;
 use crate::args::TuiArgs;
+use crate::components::Component;
 use crate::components::help::Help;
 use crate::components::home::Home;
 use crate::components::memory::Memory;
-use crate::components::Component;
 use crate::config::Config;
 use crate::config::KeyEvents;
 use crate::mode::Mode;

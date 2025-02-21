@@ -5,8 +5,8 @@ use std::path::Path;
 
 use clap::CommandFactory;
 use clap::ValueEnum;
-use clap_complete::generate_to;
 use clap_complete::Shell;
+use clap_complete::generate_to;
 
 include!("src/args.rs");
 
