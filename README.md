@@ -4,6 +4,9 @@ Terminal User Interface to run and debug programs written for [Triton VM](https:
 
 <img alt="Example run of Triton TUI" src="./examples/triton-tui.gif" width="800" />
 
+You might also be interested in the [Triton CLI](https://github.com/TritonVM/triton-cli), which lets
+you generate and verify proofs of a program's correct execution.
+
 ## Getting Started
 
 Triton TUI tries to be helpful. 🙂 List possible (and required) arguments with `triton-tui --help`.
