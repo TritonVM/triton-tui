@@ -1,7 +1,7 @@
 [package]
 name = "triton-tui"
 
-version = "0.4.0"
+version = "0.49.0" # keep this in sync with the version of Triton VM
 description = "Terminal User Interface to help debugging programs written for Triton VM."
 readme = "README.md"
 
@@ -46,7 +46,7 @@ tokio-util = "0.7"
 tracing = "0.1"
 tracing-error = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "serde"] }
-triton-vm = "=0.48.0"
+triton-vm = "=0.49.0"
 tui-textarea = "0.7"
 
 [dev-dependencies]
