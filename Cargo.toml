@@ -28,7 +28,7 @@ config = "0.15"
 crossterm = { version = "0.28", features = ["serde", "event-stream"] }
 derive_deref = "1"
 directories = "6"
-fs-err = "3.0"
+fs-err = "3.1"
 futures = "0.3"
 human-panic = "2"
 itertools = "0.14"
@@ -46,14 +46,14 @@ tokio-util = "0.7"
 tracing = "0.1"
 tracing-error = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "serde"] }
-triton-vm = "=0.49.0"
+triton-vm = "0.50.0"
 tui-textarea = "0.7"
 
 [dev-dependencies]
 assert2 = "0.3"
-proptest = "1.5"
+proptest = "1.7"
 proptest-arbitrary-interop = "0.1"
-test-strategy = "0.4.0"
+test-strategy = "0.4"
 
 [build-dependencies]
 clap = { version = "4", features = ["derive", "cargo", "wrap_help", "unicode", "string"] }

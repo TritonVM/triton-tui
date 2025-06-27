@@ -15,17 +15,17 @@ _triton-tui() {
 
     local context curcontext="$curcontext" state line
     _arguments "${_arguments_options[@]}" : \
-'-i+[File containing public input]:file: ' \
-'--input=[File containing public input]:file: ' \
-'-n+[JSON file containing all non-determinism]:file: ' \
-'--non-determinism=[JSON file containing all non-determinism]:file: ' \
-'--initial-state=[JSON file containing an entire VM state, including program and inputs. Conflicts with command line options program, input, and non-determinism]:file: ' \
-'--interrupt-cycle=[The maximum number of cycles to run after any interaction, preventing a frozen TUI in infinite loops]:u32: ' \
+'-i+[File containing public input]:file:_default' \
+'--input=[File containing public input]:file:_default' \
+'-n+[JSON file containing all non-determinism]:file:_default' \
+'--non-determinism=[JSON file containing all non-determinism]:file:_default' \
+'--initial-state=[JSON file containing an entire VM state, including program and inputs. Conflicts with command line options program, input, and non-determinism]:file:_default' \
+'--interrupt-cycle=[The maximum number of cycles to run after any interaction, preventing a frozen TUI in infinite loops]:u32:_default' \
 '-h[Print help]' \
 '--help[Print help]' \
 '-V[Print version]' \
 '--version[Print version]' \
-':program -- File containing the program to run:' \
+':program -- File containing the program to run:_default' \
 && ret=0
 }
 
