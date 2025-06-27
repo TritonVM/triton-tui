@@ -3,6 +3,12 @@
 All notable changes are documented in this file.
 Lines marked “(!)” indicate a breaking change.
 
+## [0.50.0](https://github.com/TritonVM/triton-tui/compare/v0.49.0..v0.50.0) - 2025-06-27
+
+### ⚙️ Miscellaneous
+
+- Update dependencies ([2d9bd825](https://github.com/TritonVM/triton-tui/commit/2d9bd825))
+
 ## [0.49.0](https://github.com/TritonVM/triton-tui/compare/v0.4.0..v0.49.0) - 2025-06-18
 
 ### 📚 Documentation
