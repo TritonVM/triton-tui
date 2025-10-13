@@ -17,9 +17,6 @@ lazy_static! {
         std::env::var(format!("{}_CONFIG", PROJECT_NAME.clone()))
             .ok()
             .map(PathBuf::from);
-    pub(crate) static ref GIT_COMMIT_HASH: String =
-        std::env::var(format!("{}_GIT_INFO", PROJECT_NAME.clone()))
-            .unwrap_or_else(|_| String::from("UNKNOWN"));
     pub(crate) static ref LOG_ENV: String = format!("{}_LOGLEVEL", PROJECT_NAME.clone());
     pub(crate) static ref LOG_FILE: String = format!("{}.log", env!("CARGO_PKG_NAME"));
 }
@@ -27,6 +24,7 @@ lazy_static! {
 pub(crate) const DEFAULT_INTERRUPT_CYCLE: u32 = 1_000_000;
 pub(crate) const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 pub(crate) const EXAMPLE_PROGRAM_PATH: &str = "examples/program.tasm";
+include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
 #[derive(Debug, Clone, PartialEq, Parser)]
 #[command(author, version = version(), about)]
@@ -104,13 +102,12 @@ pub(crate) fn get_config_dir() -> PathBuf {
 }
 
 pub(crate) fn version() -> String {
-    let commit_hash = GIT_COMMIT_HASH.clone();
     let author = clap::crate_authors!();
     let config_dir_path = get_config_dir().display().to_string();
     let data_dir_path = get_data_dir().display().to_string();
 
     format!(
-        "{commit_hash}\n\n\
+        "{CURR_VERSION}\n\n\
         Authors: {author}\n\n\
         Config directory: {config_dir_path}\n\
         Data directory:   {data_dir_path}"
