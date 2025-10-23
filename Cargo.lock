@@ -2498,7 +2498,7 @@ dependencies = [
 
 [[package]]
 name = "triton-tui"
-version = "0.50.0"
+version = "1.0.0"
 dependencies = [
  "arbitrary",
  "assert2",
