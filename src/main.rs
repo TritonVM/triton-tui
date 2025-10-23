@@ -78,10 +78,10 @@ fn initialize_panic_handler() -> Result<()> {
         .into_hooks();
     eyre_hook.install()?;
     std::panic::set_hook(Box::new(move |panic_info| {
-        if let Ok(mut tui) = tui::Tui::new() {
-            if let Err(report) = tui.exit() {
-                error!("Unable to exit Terminal: {report:?}");
-            }
+        if let Ok(mut tui) = tui::Tui::new()
+            && let Err(report) = tui.exit()
+        {
+            error!("Unable to exit Terminal: {report:?}");
         }
 
         #[cfg(not(debug_assertions))]

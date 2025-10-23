@@ -207,7 +207,7 @@ impl<'a> Memory<'a> {
         &self,
         render_info: RenderInfo,
         address: BFieldElement,
-    ) -> Vec<Span> {
+    ) -> Vec<Span<'_>> {
         let address_style = if address == self.requested_address() {
             Style::new().bold()
         } else {

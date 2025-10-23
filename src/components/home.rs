@@ -416,7 +416,7 @@ impl Home {
         frame.render_widget(paragraph, render_info.areas.public_input);
     }
 
-    fn maybe_render_public_input(&self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_public_input(&self, state: &TritonVMState) -> Option<Line<'_>> {
         if state.vm_state.public_input.is_empty() || !self.inputs {
             return None;
         }
@@ -446,7 +446,7 @@ impl Home {
         frame.render_widget(paragraph, render_info.areas.secret_input);
     }
 
-    fn maybe_render_secret_input(&self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_secret_input(&self, state: &TritonVMState) -> Option<Line<'_>> {
         if state.vm_state.secret_individual_tokens.is_empty() || !self.inputs {
             return None;
         }
@@ -476,28 +476,28 @@ impl Home {
         frame.render_widget(paragraph, render_info.areas.message_box);
     }
 
-    fn message(&self, state: &TritonVMState) -> Line {
+    fn message(&self, state: &TritonVMState) -> Line<'_> {
         self.maybe_render_error_message(state)
             .or_else(|| self.maybe_render_warning_message(state))
             .or_else(|| self.maybe_render_public_output(state))
             .unwrap_or_else(|| self.render_welcome_message())
     }
 
-    fn maybe_render_error_message(&self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_error_message(&self, state: &TritonVMState) -> Option<Line<'_>> {
         let message = Span::from(state.error.as_ref()?.to_string());
         let error = "ERROR".bold().red();
         let colon = ": ".into();
         Some(error + colon + message)
     }
 
-    fn maybe_render_warning_message(&self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_warning_message(&self, state: &TritonVMState) -> Option<Line<'_>> {
         let message = Span::from(state.warning.as_ref()?.to_string());
         let warning = "WARNING".bold().yellow();
         let colon = ": ".into();
         Some(warning + colon + message)
     }
 
-    fn maybe_render_public_output(&self, state: &TritonVMState) -> Option<Line> {
+    fn maybe_render_public_output(&self, state: &TritonVMState) -> Option<Line<'_>> {
         if state.vm_state.public_output.is_empty() {
             return None;
         }
@@ -509,7 +509,7 @@ impl Home {
         Some(header + colon + output + footer)
     }
 
-    fn render_welcome_message(&self) -> Line {
+    fn render_welcome_message(&self) -> Line<'_> {
         let welcome = Span::from("Welcome to the Triton VM TUI! ");
         let help_hint = "Press `h` for help.".dim();
         welcome + help_hint

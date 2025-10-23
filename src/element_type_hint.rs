@@ -46,7 +46,7 @@ impl ElementTypeHint {
         true
     }
 
-    pub fn render(maybe_self: &Option<Self>) -> Vec<Span> {
+    pub fn render(maybe_self: &Option<Self>) -> Vec<Span<'_>> {
         let Some(element_type_hint) = maybe_self else {
             return vec![];
         };
