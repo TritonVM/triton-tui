@@ -3,6 +3,12 @@
 All notable changes are documented in this file.
 Lines marked “(!)” indicate a breaking change.
 
+## [3.0.0](https://github.com/TritonVM/triton-tui/compare/v2.0.0..v3.0.0) - 2026-05-11
+
+### ⚙️ Miscellaneous
+
+- Upgrade dependencies ([77373ea6](https://github.com/TritonVM/triton-tui/commit/77373ea6))
+
 ## [2.0.0](https://github.com/TritonVM/triton-tui/compare/v1.0.0..v2.0.0) - 2026-01-21
 
 ### ⚙️ Miscellaneous
